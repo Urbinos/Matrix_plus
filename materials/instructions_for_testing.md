@@ -17,6 +17,10 @@ following points:
   or if you have root rights (for Ubuntu / Linux Mint / Debian) \
   ```sudo apt install clang-format```
 
+  Required version of clang-format: \
+  **Mac** 14.0.5 \
+  **Linux** 13.0.1
+
   Google Style: https://google.github.io/styleguide/cppguide.html
 
 
@@ -57,7 +61,4 @@ following points:
    ```valgrind --tool=memcheck --leak-check=yes. /main. out```
    
    It is strongly recommended not to use _valgrind_ utility in OS X, use _leaks_ utility instead.
-
-* **Build test.** The program can be checked for correct build on a test system environment. This will require _Docker_
-  installed. If the system has a docker, then you can go to the `materials/build` directory and run the run.sh script
-  from there. The script will wrap your solution in docker and run it along with a typical build script.
+  

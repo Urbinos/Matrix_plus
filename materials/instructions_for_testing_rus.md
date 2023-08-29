@@ -17,6 +17,10 @@
   или, если у вас есть root-права (для Ubuntu / Linux Mint / Debian) \
   ```sudo apt install clang-format```
 
+  Необходимая версия clang-format: \
+  **Mac** 14.0.5 \
+  **Linux** 13.0.1
+
   Google Style: https://google.github.io/styleguide/cppguide.html
 
 
@@ -57,7 +61,3 @@
   ```valgrind --tool=memcheck --leak-check=yes  ./main.out```
 
   Не рекомендуется использовать _valgrind_ на OS X, вместо нее лучше использовать _leaks_.
-
-* **Тест сборки.** Программу можно проверить на корректность сборки на тестовой системе. Для этого потребуется
-  установленный _Docker_. Если на системе есть докер, то можно зайти в директорию `materials/build` и запустить оттуда
-  скрипт run.sh. Скрипт обернет ваше решение в докер и запустит его вместе с типовым сценарием сборки.

@@ -1,55 +1,56 @@
-CC = gcc -std=c11 -Wall -Werror -Wextra -g
-GCOVFLAGS =  -fprofile-arcs -ftest-coverage
+CC=gcc -std=c++17
+CFLAGS=-Wall -Werror -Wextra -lstdc++
+SOURCES=s21_matrix_oop.cc
+TEST_SOURSE = s21_matrix_oop_test.cc
+LIBO=s21_matrix_oop.o
+LIBA=s21_matrix_oop.a
+OUT=tests.out
+
 OS = $(shell uname)
-ifeq ($(OS), Linux)
-    F_LIB_CHECK = -lcheck -pthread -lrt -lm
+
+ifeq ($(OS), Darwin)
+	LIBFLAGS = -lm -lgtest -lgtest_main -lstdc++
 else
-    F_LIB_CHECK = -lcheck 
+	LIBFLAGS=-lstdc++ `pkg-config --cflags --libs -lgtest -lgtest_main`
 endif
 
-all: clean s21_matrix.a 
+all: s21_matrix_oop.a
 
-s21_matrix.a: clean
-	$(CC) -c *.c
-	ar rc libs21_matrix.a *.o
-	ranlib libs21_matrix.a
-	cp libs21_matrix.a s21_matrix.a
+rebuild: clean all
 
-test: s21_matrix.a
-	$(CC) s21_matrix.a tests/s21_test_matrix.c  $(F_LIB_CHECK) -o s21_test -L. -ls21_matrix
-	./s21_test
- 
-clang: test s21_matrix.a
-	cp ../materials/linters/.clang-format .clang-format
-	clang-format -n *.c *.h
-	clang-format -n tests/*.c
-	clang-format -i *.c *.h
-	clang-format -i tests/*.c
-	rm -fr .clang-format
+s21_matrix_oop.a: clean
+	$(CC) $(CFLAGS) -c $(SOURCES) -o ./$(LIBO)
+	ar rcs $(LIBA) $(LIBO)
+	ranlib $(LIBA)
 
-gcov_report: clean s21_matrix.a
-	$(CC) $(GCOVFLAGS) tests/*.c *.c $(F_LIB_CHECK) -o s21_test -L. -ls21_matrix
-	./s21_test
-	gcov tests/*.c
-	lcov -t "test" -o test.info -c -d .
-	genhtml -o report/ test.info
-	rm -rf *.o *.gcno *.gcda 
+test: s21_matrix_oop.a
+	$(CC) $(CFLAGS) $(TEST_SOURSE) $(LIBA) $(LIBFLAGS) -o ./tests.out
+	./tests.out
+
+gcov_report: clean s21_matrix_oop.a
+	$(CC) $(CFLAGS) --coverage $(TEST_SOURSE) $(SOURCES) $(LIBA) -L. $(LIBA)  $(LIBFLAGS) -o ./$(OUT)
+	./$(OUT)
+	lcov --ignore-errors mismatch -t  "test" -c -d  ./  --no-external --output-file ./coverage.info
+	genhtml $(BUILD_PATH)coverage.info --output-directory ./report/
 	open ./report/index.html
 
+leaks:
+	# CK_FORK=no valgrind --vgdb=no --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=RESULT_VALGRIND.txt 	$(BUILD_PATH)$(OUT)
+	leaks -atExit -- ./$(OUT) 
 
-leaks: test
-	CK_FORK=no leaks --atExit -- ./s21_test
-
-valgrind:
-	$(CC) s21_matrix.a tests/*.c  $(F_LIB_CHECK) -o s21_test -L. -ls21_matrix -ggdb
-	CK_FORK=no valgrind --vgdb=no --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=RESULT_VALGRIND.txt ./s21_test
-	
-valgrind_full:
-	valgrind --trace-children=yes --track-fds=yes --track-origins=yes --leak-check=full --show-leak-kinds=all ./s21_test
+clang: 
+	cp ../materials/linters/.clang-format ./
+	clang-format -n *.cc *.h
+	rm .clang-format
 
 clean:
-	rm -rf *.o s21_test *.info *.a .clang-format *.dSYM *.out report *.txt *.gcda *.gcno run
-
-test_val:
-	$(CC) *.c tests/*.c -o run $(F_LIB_CHECK) -lgcov --coverage
-	sh valgrind.sh ./run
+	@rm -rf s21_matrix \
+	*.a \
+	*.o \
+	*.out \
+	*.info \
+	*.gcda \
+	*.gcno \
+	*.gcov \
+	*.gch  \
+	report
